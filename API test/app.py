@@ -11,7 +11,7 @@ def sign_request(base_signature):
     import hmac
     import binascii
 
-    key = "'fb23f2f838dd4a009a70ccb7f283f138&"
+    key = "fb23f2f838dd4a009a70ccb7f283f138&"
     raw = base_signature
 
     hashed = hmac.new(key, raw, sha1)
@@ -26,7 +26,8 @@ def index():
                       'oauth_signature_method': 'HMAC-SHA1',
                       'oauth_timestamp':  curr_time,
                       'oauth_version': 1.0,
-                      'method': 'POST'}
+                      'food_id': 33691,
+                      'method': 'food.get'}
     signature_text = 'POST&http%3A%2F%2Fplatform.fatsecret.com%2Frest%2Fserver.api&' + urllib.quote(urllib.urlencode(payload, True))
     payload['oauth_signature'] = urllib.quote(sign_request(signature_text))
     r = requests.post("http://platform.fatsecret.com/rest/server.api", data=payload)
