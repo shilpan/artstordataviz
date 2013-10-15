@@ -1,0 +1,49 @@
+{% extends "/layout.html" %}
+
+{% block headerfiles %}
+<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css">
+<link rel="stylesheet" href="http://getbootstrap.com/examples/signin/signin.css" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/ion.rangeSlider.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/ion.rangeSlider.skinFlat.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Pick the range of the data you wish to visualize</h1>
+    <div class="col-md-10" style="margin-top: 200px">
+      <input type="text" id="slider" name="rangeName" value="0;100000"></input>
+    </div>
+
+    <div class="col-md-2" style="margin-top: 220px">
+        <button type="button" id="submit" class="btn btn-success">Visualize!</button>
+    </div>
+</div>
+{% endblock %}
+
+{%block datavizfiles %}
+<script type="text/javascript" src="{{ url_for('static', filename='js/ion.rangeSlider.min.js') }}"></script>
+<script>
+    (function(window, document, undefined) {
+      var from = 0;
+      var to = 1000;
+      $("#slider").ionRangeSlider({
+        from: 0,                       // overwrite default FROM setting
+        to: 1000,                         // overwrite default TO setting
+        type: "double",                 // slider type
+        step: 100,                       // slider step
+        hasGrid: true,                  // enable grid
+        hideMinMax: true,               // hide Min and Max fields
+        hideFromTo: true,               // hide From and To fields
+        prettify: true,
+        onFinish: function(obj){        // callback, is called once, after slider finished it's work
+          from = obj.fromNumber;
+          to = obj.toNumber;
+        }
+      });
+
+      $('#submit').click(function(e) {
+        window.location.href = 'http://' + window.location.host + '/visualize?from=' + from  + '&to=' + to;
+      });
+    })(this, this.document);
+</script>
+{% endblock %}

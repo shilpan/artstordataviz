@@ -1,0 +1,19 @@
+{% extends "/layout.html" %}
+
+{% block headerfiles %}
+<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css">
+<link href="http://getbootstrap.com/examples/signin/signin.css" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="container">
+  <h1>Select the database you wish you visualize</h1>
+  <table class="table table-hover">
+    <tbody>
+      {% for project in projects %}
+        <tr><td onclick="artstor.listClick( {{ project['id'] }} )">{{ project["name"] }}</td><tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

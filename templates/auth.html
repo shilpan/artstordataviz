@@ -1,0 +1,17 @@
+{% extends "/layout.html" %}
+
+{% block headerfiles %}
+<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css">
+<link href="http://getbootstrap.com/examples/signin/signin.css" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="container">
+  <form class="form-signin" action="/" method="POST">
+    <h2 class="form-signin-heading">Please sign in</h2>
+    <input type="text" class="form-control" name="username" placeholder="Email address" autofocus="">
+    <input type="password" class="form-control" name="password" placeholder="Password">
+    <button class="btn btn-lg btn-primary btn-block" id="login-button" type="submit">Sign in</button>
+  </form>
+</div>
+{% endblock %}

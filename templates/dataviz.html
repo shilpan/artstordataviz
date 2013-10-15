@@ -1,0 +1,24 @@
+{% extends "/layout.html" %}
+
+{% block headerfiles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dataviz.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/tipsy.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="viz"></div>
+    <div class="panel">
+      <div class="appHeading">
+        <a class="menuButton extra" id="toggleDivider" href="javascript:void(0)" style=""><span class="menuText">Divider off</span></a>
+      </div>
+    <div class="menuContainer"></div>
+  </div>
+</div>
+{% endblock %}
+
+{%block datavizfiles %}
+<script src="{{ url_for('static', filename='js/d3.v2.min.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/jquery.tipsy.js') }}"></script>
+<script src="{{ url_for('static', filename='js/dataviz.js') }}"></script>
+{% endblock %}
