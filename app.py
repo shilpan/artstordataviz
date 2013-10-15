@@ -9,7 +9,7 @@ from flask import Flask, request, make_response, redirect, render_template, json
 
 # create the Flask app
 app = Flask(__name__)
-app.config['SECRET_KEY'] = "gadgadgfadjkfgh234sks"
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
 
 def authenticate(username, password):
   payload = {'email': username,
