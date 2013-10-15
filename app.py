@@ -45,7 +45,6 @@ def index():
 @app.route("/projects")
 def show_projects():
   r = requests.get("http://catalog.sharedshelf.artstor.org/projects", cookies={'sharedshelf' : session['cookie']})
-  print r.json()["projects"]
   return render_template('list.html', projects=r.json()["projects"])
 
 @app.route("/getdata")
