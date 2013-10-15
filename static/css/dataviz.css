@@ -85,10 +85,10 @@ html, body {
     height: 100%;
 }
 
-@font-face {
+/*@font-face {
     font-family: myGotham;
     src: url( '../artstor%20dataviz/font/Gotham-Light.otf' );
-}
+}*/
 
 .appHeading {
     height: 30px;
