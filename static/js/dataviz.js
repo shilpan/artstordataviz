@@ -10,7 +10,7 @@
 
       var freqData = (function () {
         var Data = new Array();
-        var ID = 0, max;
+        var ID = 0, max, totalNodes;
 
         var setNode = function(uName, nodeID) {
           Data.push(Object.create(Object.prototype));
@@ -60,17 +60,20 @@
             //Reset ID and Data for population
             Data.splice(0, Data.length);
 
+            totalNodes = data.length;
             data.forEach(function(d) {
               if(doSplit) {
                 var cultures;
-                if(d[selectedParameter])
-                  cultures = d[selectedParameter].split(", ");
+                if((selectedParameter == mapping["Created By"]) ? mainData.metaData.profiles[d[selectedParameter]] : d[selectedParameter])
+                  cultures = ((selectedParameter == mapping["Created By"]) ? mainData.metaData.profiles[d[selectedParameter]] : d[selectedParameter]).split(", ");
                 for(node in cultures) {
-                  if(cultures[node] != "" && cultures[node] != undefined && cultures[node] != null) incrementCount(cultures[node]);
+                  if(cultures[node] != "" && cultures[node] != undefined && cultures[node] != null)
+                    incrementCount(cultures[node]);
                 }
               }
               else {
-                if(d[selectedParameter] != "" && d[selectedParameter] != undefined && d[selectedParameter] != null) incrementCount(d[selectedParameter]);
+                if(d[selectedParameter] != "" && d[selectedParameter] != undefined && d[selectedParameter] != null)
+                  incrementCount((selectedParameter == mapping["Created By"]) ? mainData.metaData.profiles[d[selectedParameter]] : d[selectedParameter]);
               }
             });
             setMax(Data);
@@ -78,6 +81,9 @@
           },
           getMax : function() {
             return max;
+          },
+          getTotalNodes: function() {
+            return totalNodes;
           }
         }
       })();
@@ -89,7 +95,10 @@
 
         this.set = function(selector, nameArray) {
           for(name in nameArray) {
-            $(selector).append('<a class="menuButton" id="' + counter + '" href="javascript:void(0)"><span class="menuText">' + nameArray[name] + '</span></a>');
+            $(selector).append('<div class="buttonContainer">' +
+                                            '<a class="menuButton" id="' + counter + '" href="javascript:void(0)"><span class="menuText">' + nameArray[name] + '</span></a>' +
+                                            '<a class="exitButton" href="javascript:void(0)"><img class="exitImage" src="../static/img/close_button.png" /></a>' +
+                                          '</div>');
             counter++;
           }
 
@@ -105,6 +114,10 @@
             }
 
             prevClickedId = $(this).attr('id');
+          });
+
+          $(".menuContainer").on("click", ".exitButton", function(event){
+            $(this.parentNode).remove();
           });
         }
 
@@ -131,23 +144,74 @@
         }
       }
 
-      $.get('http://' + window.location.host + '/getdata' , function(data){
+      function staggeredLoad(data, current, finalData) {
+        var endLimit;
+        if (current == undefined)
+          current = 0;
+
+        if (finalData == undefined) {
+          finalData = {};
+          finalData.assets = [];
+        }
+
+        if ((data.to - data.from - current) > 256)
+          endLimit = current + 256;
+        else
+          endLimit = data.to;
+
+        $.get('http://' + window.location.host + '/getdata' , {from: current, to: endLimit}, function(dataObject){
+          $(".progress-bar").css("width", (endLimit/(data.to - data.from))*100 + "%");
+          finalData.assets = finalData.assets.concat(dataObject.assets);
+
+          if (endLimit === data.to) {
+            finalData.metaData = dataObject.metaData;
+            finalData.results = dataObject.results;
+            finalData.success = dataObject.success;
+
+            $(".progress").remove();
+            $(".viz").css('display', 'inline');
+            $(".panel").css('display', 'inline');
+
+            console.log(finalData);
+            setUpDataViz(finalData);
+          } else {
+            staggeredLoad(data, endLimit, finalData);
+          }
+        });
+      }
+
+      $.get('http://' + window.location.host + '/bounds' , function(data) {
+        // $.get('http://' + window.location.host + '/getdata' , {from: data.from, to: data.to}, function(data){
+        //   setUpDataViz(data);
+        // });
+        staggeredLoad(data);
+      });
+
+      d3.select("body").on("click", function() {
+        nodes.forEach(function(o, i) {
+          o.x += (Math.random() - .5) * 40;
+          o.y += (Math.random() - .5) * 40;
+        });
+        force.resume();
+      });
+
+      function setUpDataViz(data) {
         data.metaData.columns.forEach(function(element) {
           mapping[element.header] = element.dataIndex;
         });
 
-        mainData = data.assets;
+        mainData = data;
         menuButtons.set(".menuContainer", Object.keys(mapping));
         //console.log(mainDatamapping["Culture"]);
         //console.log(mainData[200]);
-        Array.prototype.push.apply(nodes, freqData.populate(mainData, mapping["Culture"]));
+        Array.prototype.push.apply(nodes, freqData.populate(mainData.assets, mapping["Culture"]));
         //console.log(nodes.length);
 
         force = d3.layout.force()
           .nodes(nodes)
           .links([])
           .size([$('.viz').width(), $('.viz').height()])
-          .charge(function(d, i){ return (d.Freq/freqData.getMax()) * -100;})
+          .charge(function(d, i){ return (d.Freq/freqData.getMax()) * -500;})
           .start();
 
         //Simulate click on the first element
@@ -173,21 +237,13 @@
           force.size([$('.viz').width(), $('.viz').height()]);
           force.start();
         });
-      });
-
-      d3.select("body").on("click", function() {
-        nodes.forEach(function(o, i) {
-          o.x += (Math.random() - .5) * 40;
-          o.y += (Math.random() - .5) * 40;
-        });
-        force.resume();
-      });
+      }
 
       //on click
       function selectData(title) {
         //Remove nodes completely and add the new set
         nodes.splice(0, nodes.length);
-        Array.prototype.push.apply(nodes, freqData.populate(mainData, mapping[title], divider));
+        Array.prototype.push.apply(nodes, freqData.populate(mainData.assets, mapping[title], divider));
 
         var node = vis.selectAll(".node")
                .data(force.nodes(), function(d) { return d.id;});
@@ -196,7 +252,7 @@
           .attr("class", "node")
           .attr("cx", function(d) { return d.x; })
           .attr("cy", function(d) { /*console.log(d);*/ return d.y; })
-          .attr("r", function(d) { return (d.Freq/freqData.getMax()) * 20; })
+          .attr("r", function(d) { return (d.Freq/freqData.getMax()) * 60; })
           .style("fill", function(d, i) { return fill(i & nodes.length); })
           .style("stroke", function(d, i) { return d3.rgb(fill(i & nodes.length)).darker(2); })
           .style("stroke-width", 1.5)

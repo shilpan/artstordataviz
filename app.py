@@ -5,7 +5,7 @@ import json
 
 # Retrieve Flask, our framework
 # request module gives access to incoming request data
-from flask import Flask, request, make_response, redirect, render_template, jsonify, session
+from flask import Flask, request, make_response, redirect, render_template, jsonify, session, abort
 
 # create the Flask app
 app = Flask(__name__)
@@ -45,12 +45,12 @@ def index():
 @app.route("/projects")
 def show_projects():
   r = requests.get("http://catalog.sharedshelf.artstor.org/projects", cookies={'sharedshelf' : session['cookie']})
-  return render_template('list.html', projects=r.json()["projects"])
+  return render_template('list.html', projects=r.json()["items"])
 
 @app.route("/getdata")
 def show_project_data():
-  payload = {'start': session['from'],
-                    'limit': int(session['to'] )- int(session['from']),
+  payload = {'start': request.args['from'],
+                    'limit': int(request.args['to']) - int(request.args['from']),
                     'dir': 'DESC',
                     'with_meta': 'true',
                    }
@@ -67,6 +67,15 @@ def send_project_data():
   session['from'] = request.args['from']
   session['to'] = request.args['to']
   return render_template('dataviz.html',  id = id)
+
+@app.route("/bounds")
+def send_project_bounds():
+  if 'from' not in session:
+    abort(404)
+  tst = {}
+  tst['from'] = int(session['from'])
+  tst['to'] = int(session['to'])
+  return jsonify(tst)
 
 # start the webserver
 if __name__ == "__main__":
