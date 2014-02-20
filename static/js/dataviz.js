@@ -1,29 +1,31 @@
 (function (window, document, undefined) {
-      var nodes, mainData, force, divider = false, mapping = {};
+      var nodes, mainData, force, divider = false, mapping = {}, zoomLevel = 1;
           fill = d3.scale.category20();
 
           nodes = new Array();
 
       var vis = d3.select("div.viz").append("svg:svg")
           .attr("width", '100%')
-          .attr("height", '99%'); 
+          .attr("height", '99%');
 
       var freqData = (function () {
         var Data = new Array();
         var ID = 0, max, totalNodes;
 
-        var setNode = function(uName, nodeID) {
+        var setNode = function(uName, nodeID, node) {
           Data.push(Object.create(Object.prototype));
           Data[Data.length - 1]["uniqueName"] = uName;
           Data[Data.length - 1]["Freq"] = 1;
           Data[Data.length - 1]["id"] = nodeID;
+          Data[Data.length - 1]["dataPoint"] = [node];
 
           //Increment after setting ID
           ID++;
         }
 
-        var incrementFreq = function(index) {
+        var incrementFreq = function(index, node) {
           Data[index].Freq++;
+          Data[index].dataPoint.push(node);
         }
 
         var isEqualAt = function(stringName) {
@@ -35,17 +37,16 @@
           return -1;
         }
 
-        var incrementCount = function(columnName) {
+        var incrementCount = function(columnName, node) {
           var index = isEqualAt(columnName);
-          (index == -1) ? setNode(columnName, ID) : incrementFreq(index);
+          (index == -1) ? setNode(columnName, ID, node) : incrementFreq(index, node);
         }
 
         var setMax = function(data) {
-          var keys = Object.keys(data);
-          max = data[keys[0]].Freq;
-          for ( var i = 1; i < keys.length; i++) {
-            if (max < data[keys[i]].Freq)
-              max = data[keys[i]].Freq;
+          max = data[0].Freq;
+          for ( var i = 1; i < data.length; i++) {
+            if (max < data[i].Freq)
+              max = data[i].Freq;
           }
         }
 
@@ -57,6 +58,7 @@
             return Data;
           },
           populate: function(data, selectedParameter, doSplit) {
+            console.log(data);
             //Reset ID and Data for population
             Data.splice(0, Data.length);
 
@@ -68,12 +70,12 @@
                   cultures = ((selectedParameter == mapping["Created By"]) ? mainData.metaData.profiles[d[selectedParameter]] : d[selectedParameter]).split(", ");
                 for(node in cultures) {
                   if(cultures[node] != "" && cultures[node] != undefined && cultures[node] != null)
-                    incrementCount(cultures[node]);
+                    incrementCount(cultures[node], d);
                 }
               }
               else {
                 if(d[selectedParameter] != "" && d[selectedParameter] != undefined && d[selectedParameter] != null)
-                  incrementCount((selectedParameter == mapping["Created By"]) ? mainData.metaData.profiles[d[selectedParameter]] : d[selectedParameter]);
+                  incrementCount((selectedParameter == mapping["Created By"]) ? mainData.metaData.profiles[d[selectedParameter]] : d[selectedParameter], d);
               }
             });
             setMax(Data);
@@ -237,6 +239,16 @@
           force.size([$('.viz').width(), $('.viz').height()]);
           force.start();
         });
+
+        $('#zoom-in').click(function() {
+          zoomLevel++;
+          selectData(menuButtons.getCurrentSelected());
+        });
+
+        $('#zoom-out').click(function() {
+            zoomLevel--;
+            selectData(menuButtons.getCurrentSelected());
+        });
       }
 
       //on click
@@ -244,7 +256,7 @@
         //Remove nodes completely and add the new set
         nodes.splice(0, nodes.length);
         Array.prototype.push.apply(nodes, freqData.populate(mainData.assets, mapping[title], divider));
-
+        console.log(nodes);
         var node = vis.selectAll(".node")
                .data(force.nodes(), function(d) { return d.id;});
 
@@ -252,11 +264,37 @@
           .attr("class", "node")
           .attr("cx", function(d) { return d.x; })
           .attr("cy", function(d) { /*console.log(d);*/ return d.y; })
-          .attr("r", function(d) { return (d.Freq/freqData.getMax()) * 60; })
-          .style("fill", function(d, i) { return fill(i & nodes.length); })
-          .style("stroke", function(d, i) { return d3.rgb(fill(i & nodes.length)).darker(2); })
+          .attr("r", function(d) { return (d.Freq/freqData.getMax()) * 60 * zoomLevel; })
+          .style("fill", function(d, i) { return fill(i % nodes.length); })
+          .style("stroke", function(d, i) { return d3.rgb(fill(i % nodes.length)).darker(2); })
           .style("stroke-width", 1.5)
-          .call(force.drag);
+          .call(force.drag)
+          .on("click", function(d) {
+            console.log("clicked");
+            $(".container").append(
+              '<div id="overlay-content">' +
+                '<div id="modal"></div>' +
+                '<div id="content">' +
+                  '<a class="exitButton" href="javascript:void(0)"><img class="exitImage" src="../static/img/close_button.png" /></a>' +
+                  '<table class="table-bordered">' +
+                    '<tbody class="listedIds">'+
+                      '<tr><td><b>IDs</b></td></tr>' +
+                    '</tbody>' +
+                  '</table>' +
+                '</div>' +
+              '</div>');
+
+
+            //Set click for close button
+            $(".container").on("click", ".exitButton", function(event){
+              $(this.parentNode.parentNode).remove();
+            });
+
+            //Add all IDs
+            d.dataPoint.forEach(function(element) {
+              $(".listedIds").append('<tr><td >' + element.id + '</td></tr>');
+            });
+          });
 
         node.exit().remove();
 
@@ -270,7 +308,7 @@
               html: true,
               title: function() {
             var d = this.__data__;
-            return '<p class="tooltip">' + d.uniqueName + '</p>';
+            return '<p class="tooltip">Name: ' + d.uniqueName + ', Freq: ' + d.Freq + '</p>';
               }
           });
       }
