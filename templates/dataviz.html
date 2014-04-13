@@ -3,11 +3,50 @@
 {% block headerfiles %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/dataviz.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/tipsy.css') }}">
+<style type="text/css">
+  #logoutButton {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+  }
+
+  .btn-info {
+    color: #fff;
+    background-color: #5bc0de;
+    border-color: #46b8da;
+  }
+
+  .btn-info:hover {
+    color: #fff;
+    background-color: #39b3d7;
+    border-color: #269abc;
+  }
+
+  .btn {
+    display: inline-block;
+    padding: 6px 12px;
+    margin-bottom: 0;
+    font-size: 14px;
+    font-weight: normal;
+    line-height: 1.428571429;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: middle;
+    cursor: pointer;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+  }
+</style>
 {% endblock %}
 
 {% block content %}
 <div class="container">
-
+      <button type="button" id="logoutButton" class="btn btn-info">Log Out</button>
       <div class="progress">
         <div class="progress-bar" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 0%;"></div>
       </div>
@@ -30,4 +69,9 @@
 <script src="{{ url_for('static', filename='js/d3.v2.min.js') }}"></script>
 <script type="text/javascript" src="{{ url_for('static', filename='js/jquery.tipsy.js') }}"></script>
 <script src="{{ url_for('static', filename='js/dataviz.js') }}"></script>
+<script>
+  $('#logoutButton').click(function(e) {
+    window.location = '/logout';
+  });
+</script>
 {% endblock %}

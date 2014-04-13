@@ -71,6 +71,7 @@ html, body {
     height: 100%;
     float: left;
     display: none;
+    margin-top: 55px;
 }
 
 .container:before,
@@ -262,13 +263,22 @@ html, body {
 
 #content {
   position: relative;
-  width: 960px;
+  max-width: 450px;
+  height: 100%;
+  background-color: #fff;
+  opacity: 1;
+  margin: 0 auto;
+  overflow: auto;
+}
+
+#modalContainer {
+  position: relative;
+  max-width: 450px;
   height: 80%;
   top:10%;
   background-color: #fff;
   opacity: 1;
   margin: 0 auto;
-  overflow: auto;
 }
 
 table {

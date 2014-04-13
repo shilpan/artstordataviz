@@ -3,10 +3,18 @@
 {% block headerfiles %}
 <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css">
 <link href="http://getbootstrap.com/examples/signin/signin.css" rel="stylesheet">
+<style type="text/css">
+  #logoutButton {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+  }
+</style>
 {% endblock %}
 
 {% block content %}
 <div class="container">
+  <button type="button" id="logoutButton" class="btn btn-info">Log Out</button>
   <h1>Select the database you wish you visualize</h1>
   <table class="table table-hover">
     <tbody>
@@ -16,4 +24,12 @@
     </tbody>
   </table>
 </div>
+{% endblock %}
+
+{%block datavizfiles %}
+<script>
+  $('#logoutButton').click(function(e) {
+    window.location = '/logout';
+  });
+</script>
 {% endblock %}

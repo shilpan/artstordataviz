@@ -112,3 +112,14 @@
         font-size: 9px; line-height: 9px;
         color: #000;
     }
+
+#submit {
+  display: inline-block;
+  margin-left: 20px;
+  margin-top: 40px;
+}
+
+#sliderContainer {
+  display: inline-block;
+  width: 80%;
+}

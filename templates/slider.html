@@ -5,17 +5,25 @@
 <link rel="stylesheet" href="http://getbootstrap.com/examples/signin/signin.css" rel="stylesheet">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/ion.rangeSlider.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/ion.rangeSlider.skinFlat.css') }}">
+<style type="text/css">
+  #logoutButton {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+  }
+</style>
 {% endblock %}
 
 {% block content %}
 <div class="container">
+    <button type="button" id="logoutButton" class="btn btn-info">Log Out</button>
     <h1>Pick the range of the data you wish to visualize</h1>
-    <div class="col-md-10" style="margin-top: 200px">
-      <input type="text" id="slider" name="rangeName" value="0;100000"></input>
+    <div class="col-md-12" style="margin-top: 200px">
+      <div id="sliderContainer">
+        <input type="text" id="slider" name="rangeName" value="0;100000"></input>
+      </div>
+      <button type="button" id="submit" class="btn btn-success">Visualize!</button>
     </div>
-
-    <div class="col-md-2" style="margin-top: 220px">
-        <button type="button" id="submit" class="btn btn-success">Visualize!</button>
     </div>
 </div>
 {% endblock %}
@@ -43,6 +51,10 @@
 
       $('#submit').click(function(e) {
         window.location.href = 'http://' + window.location.host + '/visualize?from=' + from  + '&to=' + to;
+      });
+
+      $('#logoutButton').click(function(e) {
+        window.location = '/logout';
       });
     })(this, this.document);
 </script>

@@ -5,7 +5,7 @@ import json
 
 # Retrieve Flask, our framework
 # request module gives access to incoming request data
-from flask import Flask, request, make_response, redirect, render_template, jsonify, session, abort
+from flask import Flask, request, make_response, redirect, render_template, jsonify, session, abort, url_for
 
 # create the Flask app
 app = Flask(__name__)
@@ -40,33 +40,54 @@ def index():
   else:
     return render_template('auth.html')
 
+@app.route("/logout")
+def logout():
+  if ('cookie' in session):
+    session.pop('cookie', None)
+    session.pop('username', None)
+    session.pop('projectID', None)
+
+  return redirect(url_for('index'))
+
 
 # Second Page Route
 @app.route("/projects")
 def show_projects():
-  r = requests.get("http://catalog.sharedshelf.artstor.org/projects", cookies={'sharedshelf' : session['cookie']})
-  return render_template('list.html', projects=r.json()["items"])
+  if ('cookie' in session):
+    r = requests.get("http://catalog.sharedshelf.artstor.org/projects", cookies={'sharedshelf' : session['cookie']})
+    return render_template('list.html', projects=r.json()["items"])
+  else:
+    return render_template('auth.html')
 
 @app.route("/getdata")
 def show_project_data():
-  payload = {'start': request.args['from'],
-                    'limit': int(request.args['to']) - int(request.args['from']),
-                    'dir': 'DESC',
-                    'with_meta': 'true',
-                   }
-  r = requests.get("http://catalog.sharedshelf.artstor.org/projects/" + session['projectID'] +"/assets", params=payload, cookies={'sharedshelf' : session['cookie']})
-  return jsonify(r.json())
+  if ('cookie' in session):
+    payload = {'start': request.args['from'],
+                      'limit': int(request.args['to']) - int(request.args['from']),
+                      'dir': 'DESC',
+                      'with_meta': 'true',
+                     }
+    r = requests.get("http://catalog.sharedshelf.artstor.org/projects/" + session['projectID'] +"/assets", params=payload, cookies={'sharedshelf' : session['cookie']})
+    return jsonify(r.json())
+  else:
+    return jsonify({'error': 'not logged in'})
 
 @app.route("/slider/<id>")
 def select_project_data(id):
-  session['projectID'] = id
-  return render_template('slider.html')
+  if ('cookie' in session):
+    session['projectID'] = id
+    return render_template('slider.html')
+  else:
+    return render_template('auth.html')
 
 @app.route("/visualize")
 def send_project_data():
-  session['from'] = request.args['from']
-  session['to'] = request.args['to']
-  return render_template('dataviz.html',  id = id)
+  if ('cookie' in session):
+    session['from'] = request.args['from']
+    session['to'] = request.args['to']
+    return render_template('dataviz.html',  id = id)
+  else:
+    return render_template('auth.html')
 
 @app.route("/bounds")
 def send_project_bounds():

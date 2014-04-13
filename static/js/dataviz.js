@@ -69,13 +69,12 @@
                 if((selectedParameter == mapping["Created By"]) ? mainData.metaData.profiles[d[selectedParameter]] : d[selectedParameter])
                   cultures = ((selectedParameter == mapping["Created By"]) ? mainData.metaData.profiles[d[selectedParameter]] : d[selectedParameter]).split(", ");
                 for(node in cultures) {
-                  if(cultures[node] != "" && cultures[node] != undefined && cultures[node] != null)
+                  if(cultures[node] != undefined && cultures[node] != null)
                     incrementCount(cultures[node], d);
                 }
               }
               else {
-                if(d[selectedParameter] != "" && d[selectedParameter] != undefined && d[selectedParameter] != null)
-                  incrementCount((selectedParameter == mapping["Created By"]) ? mainData.metaData.profiles[d[selectedParameter]] : d[selectedParameter], d);
+                incrementCount((selectedParameter == mapping["Created By"]) ? mainData.metaData.profiles[d[selectedParameter]] : d[selectedParameter], d);
               }
             });
             setMax(Data);
@@ -217,7 +216,10 @@
           .start();
 
         //Simulate click on the first element
-        $("#3").click();
+        $("#19").click();
+        $('.menuContainer').animate({
+          scrollTop: $("#19").offset().top - 100
+        }, 500);
 
         //Set the current divider with reference to the current selected
         dividerButton.set();
@@ -274,13 +276,15 @@
             $(".container").append(
               '<div id="overlay-content">' +
                 '<div id="modal"></div>' +
-                '<div id="content">' +
+                '<div id="modalContainer">' +
+                  '<div id="content">' +
+                    '<table class="table-bordered">' +
+                      '<tbody class="listedIds">'+
+                        '<tr><td><b>IDs</b></td></tr>' +
+                      '</tbody>' +
+                    '</table>' +
+                  '</div>' +
                   '<a class="exitButton" href="javascript:void(0)"><img class="exitImage" src="../static/img/close_button.png" /></a>' +
-                  '<table class="table-bordered">' +
-                    '<tbody class="listedIds">'+
-                      '<tr><td><b>IDs</b></td></tr>' +
-                    '</tbody>' +
-                  '</table>' +
                 '</div>' +
               '</div>');
 
