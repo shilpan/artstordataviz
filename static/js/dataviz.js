@@ -149,7 +149,7 @@
       function staggeredLoad(data, current, finalData) {
         var endLimit;
         if (current == undefined)
-          current = 0;
+          current = data.from;
 
         if (finalData == undefined) {
           finalData = {};
